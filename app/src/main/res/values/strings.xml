@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">RickandMorty</string>
+    <string name="character">Character</string>
+    <string name="location">Location</string>
+    <string name="episode">Episode</string>
+    <string name="status_textView">Status: %1$s</string>
+    <string name="species_textView">Species: %1$s</string>
+    <string name="gender_textView">Gender: %1$s</string>
+    <string name="origin_textView">Origin: %1$s</string>
+    <string name="location_textView">Location: %1$s</string>
+    <string name="episodes_textView">Appeared in Episodes:</string>
+    <string name="button_moreInfo">More Information</string>
+    <string name="characters_episode">Characters in this Episode</string>
+</resources>
