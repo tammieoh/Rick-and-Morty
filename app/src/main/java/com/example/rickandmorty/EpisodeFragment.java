@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,7 +43,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class EpisodeFragment extends Fragment {
     private View view;
-    private TextView name, number, air_date;
+    private TextView name, number, air_date, characters_ep;
     private String episode_name = "", episode_message = "", CHANNEL_ID = "";
     private Button more_info;
     private ImageView imageView;
@@ -53,24 +54,29 @@ public class EpisodeFragment extends Fragment {
     private String url = "https://rickandmortyapi.com/api/episode/";
     private String notification_url = "https://rickandmorty.fandom.com/wiki/";
     private static AsyncHttpClient client = new AsyncHttpClient();
+    private SharedPreferences sharedPreferences;
 
-    private SharedViewModel viewModel;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_episode, container, false);
         recyclerView = view.findViewById(R.id.recyclerView_characters);
+        LinearLayoutManager layoutManager
+                = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
+
 
         name = view.findViewById(R.id.textView_name);
         number = view.findViewById(R.id.textView_episodeNum);
         air_date = view.findViewById(R.id.textView_airDate);
         more_info = view.findViewById(R.id.button_moreInfo);
+        characters_ep = view.findViewById(R.id.charactersEp_textView);
 
+        sharedPreferences = getContext().getSharedPreferences("Settings", Context.MODE_PRIVATE);
 //        viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         Random rand = new Random();
-        int episode_num = rand.nextInt(41) + 1;
+        int episode_num = rand.nextInt(sharedPreferences.getInt("episode_count", 0) + 1);
 
         url += Integer.toString(episode_num);
 
@@ -79,13 +85,11 @@ public class EpisodeFragment extends Fragment {
         // send a get request to the api url
         client.get(url, new AsyncHttpResponseHandler() {
 
-            //            @SuppressLint("SetTextI18n")
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
                     JSONObject json = new JSONObject(new String(responseBody));
-
-//                    String file = "file:///android_asset/images/RickandMorty_Logo.png";
+                    String file = "file:///android_asset/images/RickandMorty_Logo.png";
 //                    Picasso.get().load(json.get("image").toString()).into(imageView);
                     name.setText(json.get("name").toString());
                     episode_name = json.get("name").toString();
@@ -96,36 +100,49 @@ public class EpisodeFragment extends Fragment {
                             ", please visit: https://rickandmorty.fandom.com/wiki/" + episode_name.replaceAll("\\s", "_");
 
                     notification_url += episode_name.replaceAll("\\s", "_");
-                    for(int i = 0; i < json.getJSONArray("characters").length(); i++) {
-//                        character_names.add(json.getJSONArray("characters").get(i).toString());
-//                        character_images.add(json.getJSONArray("characters").get(i).toString());
-//                        character_names.add(getCharacterInformation(json.getJSONArray("characters").get(i).toString()).get(0));
-//                        character_images.add(getCharacterInformation(json.getJSONArray("characters").get(i).toString()).get(1));
+                    if (json.getJSONArray("characters").length() == 0) {
+                       characters_ep.setText(R.string.no_characters);
+                    } else {
+                        for (int i = 0; i < json.getJSONArray("characters").length(); i++) {
+                            String temp_url = json.getJSONArray("characters").get(i).toString();
+                            client.addHeader("Accept", "application/json");
+                            // send a get request to the api url
+                            client.get(temp_url, new AsyncHttpResponseHandler() {
+                                @Override
+                                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                                    try {
+                                        JSONObject json_character = new JSONObject(new String(responseBody));
+//                                        character_names.add(json_character.get("name").toString());
+//                                        character_images.add(json_character.get("image").toString());
+//                                        for (int i = 0; i < characters.size(); i++) {
+//                                            Character character = new Character(character_names.get(i),
+//                                                    character_images.get(i));
+//                                            characters.add(character);
+//                                        }
+                                        Character character = new Character(json_character.get("name").toString(),
+                                                                    json_character.get("image").toString());
+                                        characters.add(character);
+                                        adapter = new CharacterAdapter(characters);
+                                        adapter.notifyDataSetChanged();
+                                        System.out.println(adapter.getItemCount());
+                                        //attach the adapter to the recyclerview
+                                        recyclerView.setAdapter(adapter);
 
+                                        // set layoutmanager
+                                        recyclerView.setLayoutManager(layoutManager);
 
-                        // this is where the viewModel part needs to happen
-                        // two fragments communicating with each other
-                        // observe the changes when I get name
-//                        viewModel.getInformation().observe(getViewLifecycleOwner(), new Observer<Character>() {
-//                            @Override
-//                            public void onChanged(Character c) {
-//                                if (c != null) {
-////                    textView.setText("Hi, " + s.getName() + "!\nYou live in " + s.getZipcode() + " area.");
-//
-//                                    // call the api to get the city
-//                                    setCityByZip(s, textView);
-//                                }
-//                            }
-//                        });
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                                    Log.d("url", "error with getting character url");
+                                }
+                            });
+                        }
                     }
-
-                    for(int i = 0; i < characters.size(); i++) {
-                        Character character = new Character(character_names.get(i),
-                                character_images.get(i));
-                        characters.add(character);
-                    }
-                    attachAdapter(characters);
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -133,26 +150,98 @@ public class EpisodeFragment extends Fragment {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.d("url", url);
-                Toast.makeText(getActivity(), "Error in GET REQUEST", Toast.LENGTH_SHORT).show();
+                Log.d("url", "error with getting url");
             }
-
         });
-
         more_info.setOnClickListener(v -> createNotification(v));
 
         return view;
-    }
-    public void attachAdapter(ArrayList<Character> characters) {
-        // create a location adapter
-        adapter = new CharacterAdapter(characters);
-        System.out.println(adapter.getItemCount());
-        //attach the adapter to the recyclerview
-        recyclerView.setAdapter(adapter);
+        //            @SuppressLint("SetTextI18n")
+//            @Override
+//            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+//                try {
+//                    JSONObject json = new JSONObject(new String(responseBody));
+//
+//
+////                    String file = "file:///android_asset/images/RickandMorty_Logo.png";
+////                    Picasso.get().load(json.get("image").toString()).into(imageView);
+//                    name.setText(json.get("name").toString());
+//                    episode_name = json.get("name").toString();
+//                    number.setText(json.get("episode").toString());
+//                    air_date.setText(json.get("air_date").toString());
+//
+//                    episode_message = "To read more information about Episode " + json.get("episode").toString() +
+//                            ", please visit: https://rickandmorty.fandom.com/wiki/" + episode_name.replaceAll("\\s", "_");
+//
+//                    notification_url += episode_name.replaceAll("\\s", "_");
+//                    if(json.getJSONArray("characters").length() == 0) {
+//                        System.out.println("None");
+//                    }
+//                    else {
+//                        for (int i = 0; i < json.getJSONArray("characters").length(); i++) {
+//                            String temp_url = json.getJSONArray("characters").get(i).toString();
+//
+//                            client.addHeader("Accept", "application/json");
+//                            // send a get request to the api url
+//                            client.get(temp_url, new AsyncHttpResponseHandler() {
+//                                @Override
+//                                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+//                                    try {
+//                                        JSONObject json_character = new JSONObject(new String(responseBody));
+//                                        character_names.add(json_character.get("name").toString());
+//                                        character_images.add(json_character.get("image").toString());
+//
+//                                    } catch (JSONException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//
+//                                @Override
+//                                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+//                                    Log.d("url", "error with getting character url");
+//                                }
+//                            });
+//                        }
+//
+//                        for (int i = 0; i < characters.size(); i++) {
+//                            Character character = new Character(character_names.get(i),
+//                                    character_images.get(i));
+//                            characters.add(character);
+//                        }
+//                        adapter = new CharacterAdapter(characters);
+//                        System.out.println(adapter.getItemCount());
+//                        //attach the adapter to the recyclerview
+//                        recyclerView.setAdapter(adapter);
+//
+//                        // set layoutmanager
+//                        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+//                    }
+//
+//                     }catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                @Override
+//                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+//                    Log.d("url", "error with getting character url");
+//                }
+//            });
+//
+//        more_info.setOnClickListener(v -> createNotification(v));
+//
+//        return view;
 
-        // set layoutmanager
-        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
     }
+//    public void attachAdapter(ArrayList<Character> characters) {
+//        // create a location adapter
+//        adapter = new CharacterAdapter(characters);
+//        System.out.println(adapter.getItemCount());
+//        //attach the adapter to the recyclerview
+//        recyclerView.setAdapter(adapter);
+//
+//        // set layoutmanager
+//        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+//    }
 
     public void createNotification(View view) {
         int NOTIFICATION_ID = 234;

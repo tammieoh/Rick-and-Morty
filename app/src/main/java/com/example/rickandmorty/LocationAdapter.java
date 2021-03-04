@@ -20,8 +20,9 @@ import java.util.List;
 
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHolder> {
     private List<Location> locations;
-
+    private LayoutInflater mInflater;
     public LocationAdapter(List<Location> locations) {
+//        this.mInflater = LayoutInflater.from(context);
         this.locations = locations;
     }
 
@@ -31,6 +32,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         View locationView = inflater.inflate(R.layout.item_locations, parent, false);
+//        View locationView = mInflater.inflate(R.layout.item_locations, parent, false);
         ViewHolder viewHolder = new ViewHolder(locationView);
         return viewHolder;
     }
@@ -42,6 +44,10 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
         holder.textView_type.setText(location.getType());
         holder.textView_dimension.setText(location.getDimension());
     }
+
+//    void setNewList(List<Location> location){
+//        this.locations = location;
+//    }
 
     @Override
     public int getItemCount() {
@@ -59,13 +65,13 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
             super(itemView);
             textView_name = itemView.findViewById(R.id.name_textView);
             textView_type = itemView.findViewById(R.id.type_textView);
-            textView_dimension = itemView.findViewById(R.id.dimension_type);
+            textView_dimension = itemView.findViewById(R.id.dimension_textView);
 
         }
 
         @Override
         public void onClick(View v) {
-
+            System.out.println("hihihihihihihihi");
         }
     }
 }

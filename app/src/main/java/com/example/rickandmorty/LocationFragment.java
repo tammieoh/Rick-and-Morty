@@ -1,5 +1,7 @@
 package com.example.rickandmorty;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -30,15 +33,24 @@ public class LocationFragment extends Fragment {
     private RecyclerView recyclerView;
     private LocationAdapter adapter;
     ArrayList<String> location_names = new ArrayList<>(), location_types = new ArrayList<>(), location_dimensions = new ArrayList<>();
-    private ArrayList<Location> locations = new ArrayList<>(0);
+    private ArrayList<Location> locations = new ArrayList<>();
     private String url = "https://rickandmortyapi.com/api/location";
     private static AsyncHttpClient client = new AsyncHttpClient();
+//    private SharedPreferences sharedPreferences;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_location, container, false);
         recyclerView = view.findViewById(R.id.location_recyclerView);
+//        view.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                System.out.println("onclicklistener clicked");
+//            }
+//        });
+
+//        sharedPreferences = getContext().getSharedPreferences("Settings", Context.MODE_PRIVATE);
 //        location_names = new ArrayList<>();
 //        location_types = new ArrayList<>();
 //        location_dimensions = new ArrayList<>();
@@ -46,6 +58,8 @@ public class LocationFragment extends Fragment {
 
         // set the header because of the api endpoint
         client.addHeader("Accept", "application/json");
+//        adapter = new LocationAdapter(getContext(),locations);
+//        recyclerView.setAdapter(adapter);
         // send a get request to the api url
         client.get(url, new AsyncHttpResponseHandler() {
 
@@ -64,12 +78,25 @@ public class LocationFragment extends Fragment {
                                 location_types.get(i),
                                 location_dimensions.get(i));
                         locations.add(location);
-                    }
+//                        SharedPreferences.Editor editor = sharedPreferences.edit();
+//                        editor.put
 
-                    attachAdapter(locations);
+                    }
+                    System.out.println(locations.get(0).getName());
+                    adapter = new LocationAdapter(locations);
+                    recyclerView.setAdapter(adapter);
+//                    adapter.setNewList(locations);
+//                    adapter.notifyDataSetChanged();
+                    System.out.println(adapter.getItemCount());
+                    //attach the adapter to the recyclerview
+//                    recyclerView.setAdapter(adapter);
+                    // set layoutmanager
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+
             }
 
             @Override
@@ -78,7 +105,6 @@ public class LocationFragment extends Fragment {
                 Toast.makeText(getActivity(), "Error in GET REQUEST", Toast.LENGTH_SHORT).show();
             }
         });
-
 
 
 
@@ -100,14 +126,16 @@ public class LocationFragment extends Fragment {
 
         return view;
     }
-    public void attachAdapter(ArrayList<Location> locations) {
-        // create a location adapter
-        adapter = new LocationAdapter(locations);
-        System.out.println(adapter.getItemCount());
-        //attach the adapter to the recyclerview
-        recyclerView.setAdapter(adapter);
 
-        // set layoutmanager
-        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-    }
+
+//    public void attachAdapter(ArrayList<Location> locations) {
+//        // create a location adapter
+//        adapter = new LocationAdapter(locations);
+//        System.out.println(adapter.getItemCount());
+//        //attach the adapter to the recyclerview
+//        recyclerView.setAdapter(adapter);
+//
+//        // set layoutmanager
+//        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+//    }
 }

@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center|center_horizontal"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -19,39 +18,54 @@
             android:id="@+id/textView_episodeNum"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
             android:textAlignment="center"
-            android:textSize="18sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textView_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="center" />
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:textAlignment="center"
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/textView_airDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="center" />
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:textAlignment="center"
+            android:textSize="12sp" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/charactersEp_textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="5dp"
             android:text="@string/characters_episode"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textSize="12sp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView_characters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:scrollbarStyle="outsideInset"
             android:scrollbars="horizontal" />
 
         <Button
             android:id="@+id/button_moreInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/button_moreInfo" />
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:text="@string/button_moreInfo"
+            android:textSize="12sp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,8 @@
 package com.example.rickandmorty;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,6 +37,7 @@ public class CharacterFragment extends Fragment {
     private ImageView imageView;
     private String url = "https://rickandmortyapi.com/api/character/";
     private static AsyncHttpClient client = new AsyncHttpClient();
+    private SharedPreferences sharedPreferences;
 
 //    private SharedViewModel viewModel;
 
@@ -54,8 +57,10 @@ public class CharacterFragment extends Fragment {
 
 //        viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
+        sharedPreferences = getContext().getSharedPreferences("Settings", Context.MODE_PRIVATE);
+
         Random rand = new Random();
-        int character_num = rand.nextInt(671) + 1;
+        int character_num = rand.nextInt(sharedPreferences.getInt("character_count", 0) + 1);
 
         url += Integer.toString(character_num);
 
